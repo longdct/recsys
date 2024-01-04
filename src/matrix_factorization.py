@@ -19,6 +19,7 @@ class MatrixFactorization(BaseEstimator):
         print_every: int = 100,
         epsilon: float = 1e-6,
         random_state: int = 42,
+        verbose: int = 1,
         **kwargs,
     ):
         self.k = k
@@ -45,6 +46,7 @@ class MatrixFactorization(BaseEstimator):
         # Others
         self.random_state = random_state
         self.rng = np.random.default_rng(seed=random_state)
+        self.verbose = verbose
 
     def init_params(
         self, Xinit: Optional[np.array] = None, Winit: Optional[np.array] = None
@@ -91,7 +93,7 @@ class MatrixFactorization(BaseEstimator):
         if self.W is None or self.W.shape != (self.k, self.n_users):
             self.W = self.rng.random((self.k, self.n_users))
 
-        pbar = trange(self.max_iter, desc="Iteration ")
+        pbar = trange(self.max_iter, desc="Iteration ", disable=not self.verbose)
         prev_loss = 1e9
         for i in pbar:
             self.update_X()
@@ -138,7 +140,7 @@ class MatrixFactorization(BaseEstimator):
         y_pred = np.array(y_pred)
         return y_pred
 
-    def score(self, X) -> float:
+    def score(self, X, *args, **kwargs) -> float:
         y_pred = self.predict(X)
         y_true = X["target"].values.astype(int)
-        return mean_squared_error(y_true, y_pred, squared=False)
+        return -1 * mean_squared_error(y_true, y_pred, squared=False)

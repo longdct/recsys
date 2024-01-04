@@ -1,6 +1,7 @@
 import argparse
-import numpy as np
+import pickle
 
+import numpy as np
 from sklearn.model_selection import GridSearchCV
 
 from src.data_processing import (
@@ -18,8 +19,10 @@ PARAM_GRID = {
     "user_based": [True, False],
     "lr": [0.1, 0.5, 1.0],
     "lam": [0.0, 0.1, 0.5],
-    "max_iter": [10],
+    "max_iter": [1000],
+    "verbose": [0],
 }
+
 
 
 def parse_args():
@@ -56,12 +59,17 @@ def main():
 
     PARAM_GRID["random_state"] = [args.seed]
     
-    split_data_iter = split_data_cv(df, cv=args.cv, random_state=args.seed)
+    df_train, _, df_test = split_data(df, valid_size=0.0, test_size=0.1, random_state=args.seed)
+    split_data_iter = split_data_cv(df_train, cv=args.cv, random_state=args.seed)
 
     clf = GridSearchCV(
-        MatrixFactorization(), param_grid=PARAM_GRID, cv=split_data_iter, verbose=1, n_jobs=args.n_jobs
+        MatrixFactorization(), param_grid=PARAM_GRID, cv=split_data_iter, verbose=3, n_jobs=args.n_jobs, return_train_score=True
     )
     clf.fit(df)
+    with open("results/cv_results.pkl", "wb") as f:
+        pickle.dump(clf.cv_results_, f)
+    score = clf.score(df_test)
+    print(score)
 
 
 if __name__ == "__main__":

@@ -99,11 +99,15 @@ def split_data(
     df_train, df_eval = train_test_split(
         remaining_data, test_size=(valid_size + test_size), random_state=random_state
     )
-    df_valid, df_test = train_test_split(
-        df_eval,
-        test_size=test_size / (valid_size + test_size),
-        random_state=random_state,
-    )
+    if valid_size != 0:
+        df_valid, df_test = train_test_split(
+            df_eval,
+            test_size=test_size / (valid_size + test_size),
+            random_state=random_state,
+        )
+    else:
+        df_valid = None
+        df_test = df_eval
     df_train = pd.concat([df_train, subset], axis=0)
     return df_train, df_valid, df_test
 

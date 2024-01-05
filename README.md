@@ -27,6 +27,14 @@ To search for optimal hyper-parameters, I employ grid-search on training set wit
 ```
 After the best hyper-params combination is found, I refit the model on whole training set and measure RMSE on the unseen test set.
 
+## Run experiments
+Run this command to perform a hyper-parameters search and refit with best combination
+```
+# <dataset> can take one of the following values: [frappe, frappe_binning, tripadvisor]
+
+python run_gridsearch.py --dataset <dataset> --n_jobs -1
+```
+
 ## Results
 Here are the results of best hyper-parameters on unseen test sets. Detailed hyper-parameters search results are found in the `results` folder.
 

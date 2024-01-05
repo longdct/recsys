@@ -58,7 +58,11 @@ class MatrixFactorization(BaseEstimator):
         delta = self.utility_matrix - self.X.dot(self.W)
         delta = np.ma.array(delta, mask=self.mat_mask)
         L = 0.5 * (delta**2).mean()
-        L += 0.5 * self.lam * (np.linalg.norm(self.X, "fro") + np.linalg.norm(self.W, "fro"))
+        L += (
+            0.5
+            * self.lam
+            * (np.linalg.norm(self.X, "fro") + np.linalg.norm(self.W, "fro"))
+        )
         return L
 
     def update_X(self) -> None:

@@ -113,7 +113,9 @@ def split_data(
 
 
 def split_data_cv(
-    df: pd.DataFrame, cv: int = 5, random_state: int = 42,
+    df: pd.DataFrame,
+    cv: int = 5,
+    random_state: int = 42,
 ) -> Tuple:
     # Split data into train, valid, test
     # Ensuring that there is no unknown user or item in valid and test set

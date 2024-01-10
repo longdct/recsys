@@ -8,7 +8,6 @@ from src.data_processing import (
     load_tripadvisor,
     load_frappe,
     split_data,
-    convert_df_to_utility_mat,
     split_data_cv,
 )
 from src.matrix_factorization import MatrixFactorization
@@ -29,7 +28,7 @@ def parse_args():
     parser.add_argument(
         "--dataset",
         type=str,
-        choices=["tripadvisor", "frappe", "frappe_binning"],
+        choices=["tripadvisor", "frappe", "frappe_binning", "frappe_lognorm"],
         help="Dataset",
     )
     parser.add_argument("--test_size", type=float, default=0.1, help="Test size")
@@ -49,11 +48,14 @@ def main():
         bound = (1, 5)
         # bound = None
     elif args.dataset == "frappe":
-        df = load_frappe()
+        df = load_frappe(process_target="none")
         bound = None
     elif args.dataset == "frappe_binning":
-        df = load_frappe(do_binning=True)
+        df = load_frappe(process_target="binning")
         bound = None
+    elif args.dataset == "frappe_lognorm":
+        df = load_frappe(process_target="lognorm")
+        bound = (1, 5)
     else:
         raise NotImplementedError(f"Dataset {args.dataset} not implemented")
 
@@ -76,7 +78,7 @@ def main():
     print("Best params: ", clf.best_params_)
     with open(f"results/cv_results_{args.dataset}.pkl", "wb") as f:
         pickle.dump(clf.cv_results_, f)
-    score = clf.score(df_test)
+    score = clf.score(df_test, bound=bound)
     print(score)
 
 

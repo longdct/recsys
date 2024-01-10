@@ -144,7 +144,7 @@ class MatrixFactorization(BaseEstimator):
         y_pred = np.array(y_pred)
         return y_pred
 
-    def score(self, X, *args, **kwargs) -> float:
-        y_pred = self.predict(X)
+    def score(self, X, bound: Optional[Tuple[int, int]] = None, *args, **kwargs) -> float:
+        y_pred = self.predict(X, bound=bound)
         y_true = X["target"].values.astype(int)
         return -1 * mean_squared_error(y_true, y_pred, squared=False)

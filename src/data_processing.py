@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import KBinsDiscretizer, MinMaxScaler
 
 
 def categorical_to_int(df: pd.DataFrame, column: str) -> pd.DataFrame:
@@ -24,17 +25,23 @@ def load_tripadvisor(path: Optional[str] = None) -> pd.DataFrame:
     return df
 
 
-def load_frappe(path: Optional[str] = None, do_binning: bool = False) -> pd.DataFrame:
+def load_frappe(path: Optional[str] = None, process_target: str="lognorm") -> pd.DataFrame:
+    assert process_target in ["lognorm", "none", "binning"], f"Invalid target processing {process_target}"
     if path is None:
         path = "data/Mobile_Frappe/frappe/frappe.csv"
     df = pd.read_csv(path, sep="\t")
     df = categorical_to_int(df, "user")
     df = categorical_to_int(df, "item")
-    if do_binning:
+    if process_target == "lognorm":
+        scaler = MinMaxScaler(feature_range=(1, 5))
+        df["target"] = np.log(df["cnt"] + 1)
+        df["target"] = scaler.fit_transform(df[["target"]])
+    elif process_target == "binning":
+        # TODO: try KBinsDiscretizer
         df["bin_cnt"] = pd.qcut(df["cnt"], 11, labels=False, duplicates="drop")
         df = categorical_to_int(df, "bin_cnt")
         df = df.rename(columns={"bin_cnt": "target"})
-    else:
+    elif process_target == "none":
         df = df.rename(columns={"cnt": "target"})
     return df
 
